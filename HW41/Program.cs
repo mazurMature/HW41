@@ -15,6 +15,9 @@ namespace HW41
 
     class Dispetcher
     {
+        const string CommandAddTrain = "1";
+        const string CommandExit = "2";
+
         private List<Train> _trains = new List<Train>();
 
         private Random _random = new Random();
@@ -24,9 +27,6 @@ namespace HW41
 
         public void Work()
         {
-            const string CommandAddTrain = "1";
-            const string CommandExit = "2";
-
             bool isWork = true;
 
             while (isWork)
@@ -35,10 +35,7 @@ namespace HW41
 
                 ShowAllTrains();
 
-                Console.WriteLine("\nМеню:");
-                Console.WriteLine($"{CommandAddTrain}. Создать поезд");
-                Console.WriteLine($"{CommandExit}. Выход");
-                Console.Write("Выберите действие: ");
+                ShowMenu();
 
                 string input = Console.ReadLine();
 
@@ -54,7 +51,7 @@ namespace HW41
                         break;
 
                     default:
-                        Console.WriteLine("Некорректный ввод. Нажмите любую клавишу...");
+                        Console.WriteLine("Некорректная команда. Пожалуйста, выберите из доступных пунктов меню.");
                         Console.ReadKey();
                         break;
                 }
@@ -81,9 +78,9 @@ namespace HW41
             Console.WriteLine("Нажмите любую клавишу для формирования поезда...");
             Console.ReadKey();
 
-            Train train = new Train(direction, passengers);
+            Train train = new Train(direction, passengers, _random);
 
-            train.FormTrain();
+            FormTrain(passengers, train);
             _trains.Add(train);
 
             Console.WriteLine("\nПоезд успешно создан:");
@@ -91,6 +88,27 @@ namespace HW41
 
             Console.WriteLine("\nНажмите любую клавишу для продолжения...");
             Console.ReadKey();
+        }
+
+        public void FormTrain(int passengers, Train train)
+        {
+            int minCapacity = 30;
+            int maxCapacity = 50;
+
+            int passengersLeft = passengers;
+
+            while (passengersLeft > 0)
+            {
+                int capacity = _random.Next(minCapacity, maxCapacity + 1);
+
+                if (capacity > passengersLeft)
+                    capacity = passengersLeft;
+
+                Wagon wagon = new Wagon(capacity);
+                train.AddWagon(wagon);
+
+                passengersLeft -= capacity;
+            }
         }
 
         public void ShowAllTrains()
@@ -109,20 +127,28 @@ namespace HW41
                 }
             }
         }
+
+        private void ShowMenu()
+        {
+            Console.WriteLine("\nМеню:");
+            Console.WriteLine($"{CommandAddTrain}. Создать поезд");
+            Console.WriteLine($"{CommandExit}. Выход");
+            Console.Write("Выберите действие: ");
+        }
     }
 
     class Direction
     {
+        public Direction(string from, string to)
+        {
+            StartPoint = from;
+            EndPoint = to;
+        }
+
         public string StartPoint { get; private set; }
         public string EndPoint { get; private set; }
 
-        public Direction(string from, string to)
-        {
-            StartPoint = from; 
-            EndPoint = to;   
-        }
-
-        public string ShowDirection()
+        public string GetDirection()
         {
             return $"{StartPoint} -> {EndPoint}";
         }
@@ -130,27 +156,27 @@ namespace HW41
 
     class Wagon
     {
-        public int Capacity { get; private set; }
-
         public Wagon(int capacity)
         {
             Capacity = capacity;
         }
+
+        public int Capacity { get; private set; }
     }
 
     class Train
     {
         private Direction _direction;
+        private Random _random;
         private int _passengers;
 
         private List<Wagon> _wagons = new List<Wagon>();
 
-        private Random _random = new Random();
-
-        public Train(Direction direction, int passengers)
+        public Train(Direction direction, int passengers, Random random)
         {
             _direction = direction;
             _passengers = passengers;
+            _random = random;
         }
 
         public void AddWagon(Wagon wagon)
@@ -158,29 +184,9 @@ namespace HW41
             _wagons.Add(wagon);
         }
 
-        public void FormTrain()
-        {
-            int _minCapacity = 30;
-            int _maxCapacity = 50;
-
-            int passengersLeft = _passengers;
-
-            while (passengersLeft > 0)
-            {
-                int capacity = _random.Next(_minCapacity, _maxCapacity + 1); 
-
-                if (capacity > passengersLeft)
-                    capacity = passengersLeft;
-
-                _wagons.Add(new Wagon(capacity));
-
-                passengersLeft -= capacity;
-            }
-        }
-
         public void ShowFullInfo()
         {
-            Console.WriteLine($"Направление: {_direction.ShowDirection()}");
+            Console.WriteLine($"Направление: {_direction.GetDirection()}");
             Console.WriteLine($"Количество вагонов: {_wagons.Count}");
 
             for (int i = 0; i < _wagons.Count; i++)
@@ -189,7 +195,7 @@ namespace HW41
 
         public string GetShortInfo()
         {
-            return $"Направление: {_direction.ShowDirection()}, Вагонов: {_wagons.Count}";
+            return $"Направление: {_direction.GetDirection()}, Вагонов: {_wagons.Count}";
         }
     }
 }
