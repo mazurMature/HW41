@@ -78,7 +78,7 @@ namespace HW41
             Console.WriteLine("Нажмите любую клавишу для формирования поезда...");
             Console.ReadKey();
 
-            Train train = new Train(direction, passengers, _random);
+            Train train = new Train(direction);
 
             FormTrain(passengers, train);
             _trains.Add(train);
@@ -167,16 +167,12 @@ namespace HW41
     class Train
     {
         private Direction _direction;
-        private Random _random;
-        private int _passengers;
 
         private List<Wagon> _wagons = new List<Wagon>();
 
-        public Train(Direction direction, int passengers, Random random)
+        public Train(Direction direction)
         {
             _direction = direction;
-            _passengers = passengers;
-            _random = random;
         }
 
         public void AddWagon(Wagon wagon)
